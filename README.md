@@ -31,7 +31,7 @@ python -m forecast_lab --data path/to/daily_sales.csv --out reports/my_run \
 
 Input columns: `date` (YYYY-MM-DD), `sku` (item ID), `units` (nonnegative quantity), `promo` (`0` or `1`). Each SKU needs continuous daily dates and at least `min_train + horizon` rows. Promotion values must be known at prediction time. See [`data/sample.csv`](data/sample.csv) for the format.
 
-Run tests with `pip install -r requirements-dev.txt && pytest -q`.
+Run tests with `pip install -r requirements-dev.txt && python -m pytest -q`.
 
 ## Evaluation choices
 
