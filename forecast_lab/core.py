@@ -42,8 +42,14 @@ def validate_data(frame: pd.DataFrame) -> pd.DataFrame:
         raise ValueError("required columns cannot contain missing values")
     if data.duplicated(["sku", "date"]).any():
         raise ValueError("duplicate sku/date rows")
-    if (data["units"] < 0).any() or not np.isfinite(data["units"]).all():
-        raise ValueError("units must be finite and nonnegative")
+    try:
+        data["units"] = pd.to_numeric(data["units"], errors="raise")
+    except (ValueError, TypeError):
+        raise ValueError("units must be numeric") from None
+    if ((data["units"] < 0).any() or not np.isfinite(data["units"]).all()
+            or not data["units"].eq(data["units"].round()).all()):
+        raise ValueError("units must be finite, nonnegative whole numbers")
+    data["units"] = data["units"].astype(int)
     if not data["promo"].isin([0, 1]).all():
         raise ValueError("promo must be 0 or 1")
     for sku, group in data.groupby("sku"):
@@ -84,8 +90,8 @@ class BacktestConfig:
 
 def backtest(frame: pd.DataFrame, config: BacktestConfig = BacktestConfig()) -> pd.DataFrame:
     """Evaluate entire future windows with training restricted to previous dates."""
-    if min(config.min_train_days, config.horizon_days, config.step_days) <= 0:
-        raise ValueError("backtest windows must be positive")
+    if config.min_train_days < 7 or min(config.horizon_days, config.step_days) <= 0:
+        raise ValueError("min_train_days must be at least 7; horizon_days and step_days must be positive")
     data = validate_data(frame)
     outputs = []
     for sku, group in data.groupby("sku", sort=True):

@@ -19,9 +19,10 @@ def test_future_actuals_cannot_affect_earlier_fold_predictions():
     config = BacktestConfig(180, 14, 14)
     original = backtest(data, config)
     changed = data.copy()
-    changed.loc[changed.date >= pd.Timestamp("2025-08-01"), "units"] = 999
-    rerun = backtest(changed, config)
     first_cutoff = original.cutoff.min()
+    # Change actuals inside the first forecast window, leaving all training rows intact.
+    changed.loc[changed.date > first_cutoff, "units"] = 999
+    rerun = backtest(changed, config)
     left = original[original.cutoff == first_cutoff].forecast.reset_index(drop=True)
     right = rerun[rerun.cutoff == first_cutoff].forecast.reset_index(drop=True)
     pd.testing.assert_series_equal(left, right)
@@ -33,3 +34,7 @@ def test_invalid_data_rejected():
         validate_data(pd.concat([data, data.iloc[[0]]]))
     with pytest.raises(ValueError, match="too little history"):
         backtest(data)
+    with pytest.raises(ValueError, match="whole numbers"):
+        validate_data(data.assign(units=1.5))
+    with pytest.raises(ValueError, match="at least 7"):
+        backtest(data, BacktestConfig(6, 14, 14))

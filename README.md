@@ -8,11 +8,20 @@ A low error score means little if a model accidentally sees the future. Each fol
 
 ## Run it
 
-```bash
+Windows PowerShell (Python 3.11+):
+
+```powershell
 python -m venv .venv
-# Windows: .venv\Scripts\activate
-# macOS/Linux: source .venv/bin/activate
-pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+.\.venv\Scripts\python.exe -m forecast_lab
+```
+
+macOS/Linux:
+
+```bash
+python3 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
 python -m forecast_lab
 ```
 
@@ -31,7 +40,7 @@ python -m forecast_lab --data path/to/daily_sales.csv --out reports/my_run \
 
 Input columns: `date` (YYYY-MM-DD), `sku` (item ID), `units` (nonnegative quantity), `promo` (`0` or `1`). Each SKU needs continuous daily dates and at least `min_train + horizon` rows. Promotion values must be known at prediction time. See [`data/sample.csv`](data/sample.csv) for the format.
 
-Run tests with `pip install -r requirements-dev.txt && python -m pytest -q`.
+Run tests with your virtual environment's Python: `python -m pip install -r requirements-dev.txt && python -m pytest -q` (use `.\.venv\Scripts\python.exe` in place of `python` on Windows PowerShell).
 
 ## Evaluation choices
 
